@@ -1,9 +1,7 @@
-use macroquad::prelude::{Vec2, vec2, rand};
+use macroquad::prelude::{Vec2, vec2, rand, screen_width, screen_height};
 use rstar::{AABB, PointDistance, RTree, RTreeObject};
 
 const LETTERS : &[char] = &['a','d','p','m', 'n', 'n', 'n', 'i'];
-const WORLD_WIDTH : f32 = 1920.;
-const WORLD_HEIGHT : f32 = 1200.;
 
 fn modulus<T>(a:T, b:T) -> T
 where T: std::ops::Rem<Output=T>+
@@ -39,8 +37,8 @@ impl Biot {
         let mut s = Self {
             life: 0.,
             pos: vec2(
-                rand::gen_range(0., 1.)*WORLD_WIDTH,
-                rand::gen_range(0., 1.)*WORLD_HEIGHT
+                rand::gen_range(0., 1.)*screen_width(),
+                rand::gen_range(0., 1.)*screen_height()
                 ),
             speed: vec2(0., 0.),
             age: 0,
@@ -74,8 +72,8 @@ impl Biot {
             }
         }
         self.pos += self.speed;
-        self.pos.x = modulus(self.pos.x, WORLD_WIDTH);
-        self.pos.y = modulus(self.pos.y, WORLD_HEIGHT);
+        self.pos.x = modulus(self.pos.x, screen_width());
+        self.pos.y = modulus(self.pos.y, screen_height());
         self.speed *= 0.9;
         self.life += (self.photosynthesis - self.metabolism())*0.4;
         if rand::gen_range(0., 1.) < 0.2*self.motion {
