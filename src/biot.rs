@@ -1,5 +1,4 @@
-use macroquad::math::{Vec2, vec2};
-use oorandom::Rand32;
+use macroquad::prelude::{Vec2, vec2, rand};
 use rstar::{AABB, PointDistance, RTree, RTreeObject};
 
 const LETTERS : &[char] = &['a','d','p','m', 'n', 'n', 'n', 'i'];
@@ -32,16 +31,16 @@ pub struct Biot {
 }
 
 impl Biot {
-    pub fn random_biot(rng: &mut Rand32) -> Self {
+    pub fn random_biot() -> Self {
         let mut genome = ['u';13];
         for letter in genome.iter_mut() {
-            *letter = LETTERS[rng.rand_range(0..(LETTERS.len() as u32)) as usize];
+            *letter = LETTERS[rand::gen_range(0, LETTERS.len() as u32) as usize];
         }
         let mut s = Self {
             life: 0.,
             pos: vec2(
-                rng.rand_float()*WORLD_WIDTH,
-                rng.rand_float()*WORLD_HEIGHT
+                rand::gen_range(0., 1.)*WORLD_WIDTH,
+                rand::gen_range(0., 1.)*WORLD_HEIGHT
                 ),
             speed: vec2(0., 0.),
             age: 0,
@@ -56,7 +55,7 @@ impl Biot {
         s.life = s.base_life();
         s
     }
-    pub fn step(&mut self, rtree: &RTree<TreePoint>, feed_dir: Option<Vec2>, rng: &mut Rand32) -> Option<Biot> {
+    pub fn step(&mut self, rtree: &RTree<TreePoint>, feed_dir: Option<Vec2>) -> Option<Biot> {
         let mut offspring = None;
         let adult_factor = 4.;
         if self.life >= self.base_life()*adult_factor {
@@ -65,11 +64,11 @@ impl Biot {
             if close_by.map_or(true, |(_,d2)|d2>200.) {
                 let mut off = self.clone();
                 off.age = 0;
-                while rng.rand_float() < 0.2 {
-                    off.mutate(rng);
+                while rand::gen_range(0., 1.) < 0.2 {
+                    off.mutate();
                 }
                 off.life = off.base_life();
-                off.random_move(rng, 1.5);
+                off.random_move(1.5);
                 offspring = Some(off);
                 self.life = (adult_factor-1.)* self.base_life();
             }
@@ -79,16 +78,16 @@ impl Biot {
         self.pos.y = modulus(self.pos.y, WORLD_HEIGHT);
         self.speed *= 0.9;
         self.life += (self.photosynthesis - self.metabolism())*0.4;
-        if rng.rand_float() < 0.2*self.motion {
+        if rand::gen_range(0., 1.) < 0.2*self.motion {
             let speed = 7. * self.motion / self.weight();
             if self.intelligence > 0. {
                 if let Some(feed_dir) = feed_dir {
                     self.motion(feed_dir, speed);
                 } else {
-                    self.random_move(rng, speed)
+                    self.random_move(speed)
                 }
             } else {
-                self.random_move(rng, speed)
+                self.random_move(speed)
             }
         }
         self.age += 1;
@@ -120,14 +119,14 @@ impl Biot {
         self.motion= self.genome.iter().filter(|&&c|c=='m').count() as f32 * 0.1;
         self.intelligence= self.genome.iter().filter(|&&c|c=='i').count() as f32 * 10.;
     }
-    fn random_move(&mut self, rng: &mut Rand32, speed: f32) {
-        self.motion(vec2(rng.rand_float()-0.5, rng.rand_float()-0.5).normalize(), speed);
+    fn random_move(&mut self, speed: f32) {
+        self.motion(vec2(rand::gen_range(0., 1.)-0.5, rand::gen_range(0., 1.)-0.5).normalize(), speed);
     }
     fn motion(&mut self, dir:Vec2, speed: f32) {
         self.speed += dir *speed;
     }
-    fn mutate(&mut self, rng: &mut Rand32) {
-        self.genome[rng.rand_range(0..(self.genome.len() as u32)) as usize] = LETTERS[rng.rand_range(0..(LETTERS.len() as u32)) as usize];
+    fn mutate(&mut self) {
+        self.genome[rand::gen_range(0, self.genome.len() as u32) as usize] = LETTERS[rand::gen_range(0, LETTERS.len() as u32) as usize];
         self.set_from_genome();
     }
     fn base_life(&self) -> f32 {

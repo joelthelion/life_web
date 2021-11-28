@@ -1,5 +1,4 @@
 use macroquad::prelude::*;
-use oorandom::Rand32;
 use crate::biot::{Biot, TreePoint};
 use rstar::RTree;
 
@@ -8,14 +7,14 @@ pub struct BiotCollection {
 }
 
 impl BiotCollection {
-    pub fn new(n: usize, rng: &mut Rand32) -> Self {
+    pub fn new(n: usize) -> Self {
         let mut s = Self { biots: Vec::new() };
         for _ in 0..n {
-            s.biots.push(Biot::random_biot(rng));
+            s.biots.push(Biot::random_biot());
         }
         s
     }
-    pub fn step(&mut self, rng: &mut Rand32) {
+    pub fn step(&mut self) {
         let mut new : Vec<Biot> = Vec::new();
         let tree : RTree<TreePoint> = RTree::bulk_load(
             self.biots
@@ -37,7 +36,7 @@ impl BiotCollection {
                     }
                 }
             }
-            let off = self.biots[n].step(&tree, feed_dir, rng);
+            let off = self.biots[n].step(&tree, feed_dir);
             if let Some(offspring) = off {
                 new.push(offspring);
             }
