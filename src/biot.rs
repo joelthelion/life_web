@@ -1,8 +1,16 @@
 use macroquad::prelude::{Vec2, vec2, rand, screen_width, screen_height};
 use rstar::{AABB, PointDistance, RTree, RTreeObject};
 
+/// Elements of the biots' genomes:
+/// a for attack
+/// d for defence
+/// p for photosynthesis
+/// m for motion
+/// i for intelligence
+/// n does nothing
 const LETTERS : &[char] = &['a','d','p','m', 'n', 'n', 'n', 'i'];
 
+/// Modulus operator to get toroidal world topology
 fn modulus<T>(a:T, b:T) -> T
 where T: std::ops::Rem<Output=T>+
       std::ops::Add<Output = T>+
@@ -11,15 +19,16 @@ where T: std::ops::Rem<Output=T>+
     ((a % b) + b) % b
 }
 
+/// A single biot
 #[derive(Clone, Debug)]
 pub struct Biot {
-    /// Status
+    // Status
     life: f32,
     pub pos: Vec2,
     speed: Vec2,
     age: u32,
 
-    /// Genome
+    // Genome
     genome: [char; 13],
     pub attack: f32,
     pub defense: f32,
@@ -29,6 +38,7 @@ pub struct Biot {
 }
 
 impl Biot {
+    /// Create a random biot
     pub fn random_biot() -> Self {
         let mut genome = ['u';13];
         for letter in genome.iter_mut() {
@@ -53,6 +63,7 @@ impl Biot {
         s.life = s.base_life();
         s
     }
+    /// Compute the evolution of the biot for one simulation step
     pub fn step(&mut self, rtree: &RTree<TreePoint>, feed_dir: Option<Vec2>) -> Option<Biot> {
         let mut offspring = None;
         let adult_factor = 4.;
@@ -80,7 +91,7 @@ impl Biot {
             let speed = 7. * self.motion / self.weight();
             if self.intelligence > 0. {
                 if let Some(feed_dir) = feed_dir {
-                    self.motion(feed_dir, speed);
+                    self.accelerate(feed_dir, speed);
                 } else {
                     self.random_move(speed)
                 }
@@ -91,6 +102,7 @@ impl Biot {
         self.age += 1;
         offspring
     }
+    /// Compute the interaction between two biots
     pub fn interact(biots: &mut Vec<Self>, i:usize, j:usize) {
         let dist = (biots[i].pos - biots[j].pos).length();
         if dist < 10.* (biots[i].weight() + biots[j].weight()) {
@@ -107,9 +119,11 @@ impl Biot {
     pub fn dead(&self) -> bool {
         self.life <= 0. || self.age >= 10000
     }
+    /// Are we stronger than this other biot?
     pub fn stronger(&self, other: &Self) -> bool {
         self.attack > other.attack + other.defense * 0.8
     }
+    /// Compute chacteristics from biot genome
     fn set_from_genome(&mut self) {
         self.attack= self.genome.iter().filter(|&&c|c=='a').count() as f32 * 0.1;
         self.defense= self.genome.iter().filter(|&&c|c=='d').count() as f32 * 0.1;
@@ -117,27 +131,36 @@ impl Biot {
         self.motion= self.genome.iter().filter(|&&c|c=='m').count() as f32 * 0.1;
         self.intelligence= self.genome.iter().filter(|&&c|c=='i').count() as f32 * 10.;
     }
+    /// Move in a random direction
     fn random_move(&mut self, speed: f32) {
-        self.motion(vec2(rand::gen_range(0., 1.)-0.5, rand::gen_range(0., 1.)-0.5).normalize(), speed);
+        self.accelerate(vec2(rand::gen_range(0., 1.)-0.5, rand::gen_range(0., 1.)-0.5).normalize(), speed);
     }
-    fn motion(&mut self, dir:Vec2, speed: f32) {
+    /// Apply acceleration in a certain direction
+    fn accelerate(&mut self, dir:Vec2, speed: f32) {
         self.speed += dir *speed;
     }
+    /// Randomly mutate a single base
     fn mutate(&mut self) {
         self.genome[rand::gen_range(0, self.genome.len() as u32) as usize] = LETTERS[rand::gen_range(0, LETTERS.len() as u32) as usize];
         self.set_from_genome();
     }
+    /// Original life points of a biot. Also used to determine when the biot will spawn
     fn base_life(&self) -> f32 {
         8. * self.weight()
     }
+    /// Metabolic cost of various traits. These parameters are aboslutely critical to the
+    /// simulation
     fn metabolism(&self) -> f32 {
         0.2*(4.5*self.attack + 2.3*self.defense + 2.5*self.motion + 0.1*self.intelligence)
     }
+    /// Total weight of the biot, useful for computing motion
     fn weight(&self) -> f32 {
         self.attack + self.defense + self.photosynthesis + self.motion
     }
 }
 
+/// Helper structure used for the rstar geometric data structure. This data structure is used for
+/// computing interaction between biots fluidly even with thousands of them
 pub struct TreePoint {
     pub x:f64,
     pub y:f64,
