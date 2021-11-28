@@ -1,4 +1,6 @@
 Life simulation written in Rust, inspired by this very old screensaver: https://sourceforge.net/projects/primlife/
+
+Demo: https://joelthelion.github.io/life_web/demo/
   
 Biots are allowed to evolve through mutation and natural selection.
 Biots have a simple genome giving them unique characteristics:
