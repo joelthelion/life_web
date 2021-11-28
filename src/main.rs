@@ -8,6 +8,7 @@ use biot_collection::BiotCollection;
 #[macroquad::main("Life")]
 async fn main() {
 
+    rand::srand(miniquad::date::now().to_bits());
     let mut biots = BiotCollection::new(600);
 
     loop {
