@@ -10,11 +10,15 @@
             margin: 0px;
             padding: 0px;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: absolute;
-            background: black;
+            background: #000010;
             z-index: 0;
+            color: white;
+        }
+        canvas {
+            height: 80%
+        }
+        #text a {
+          color: gray;
         }
     </style>
 </head>
@@ -25,5 +29,12 @@
     <script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
     <script>load("life_web.wasm");</script> <!-- Your compiled wasm file -->
 </body>
-
+<div id=text>
+  <p>Life simulation written in Rust. Source here: <a href="https://github.com/joelthelion/life_web">https://github.com/joelthelion/life_web</a>.
+  Inspired by this very old screensaver: <a href="https://sourceforge.net/projects/primlife/">https://sourceforge.net/projects/primlife/</a></p>
+  <p>Biots are allowed to evolve through mutation and natural selection.<br>Biots have a simple genome giving them unique characteristics:</p>
+  <ul>
+    <li>Green allows them to collect energy from the sun</li><li>Red allows them to eat other biots</li><li>Dark blue allows them to defend</li><li>Light blue allows them to move around</li></ul>
+  <p>A special trait, intelligence (denoted by a square), allows them to move towards the nearest edible biot instead of randomly.<br>All non-green traits cost energy.</p>
+</div>
 </html>

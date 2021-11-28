@@ -30,7 +30,7 @@ impl BiotCollection {
                         break;
                     }
                     if self.biots[n].stronger(&self.biots[other.idx]) {
-                        // println!("found a victim! {:?} -> {:?}", self.biots[n], self.biots[other.idx]);
+                        // Add small offset to workaround rstart panic. TODO: report it upstream
                         feed_dir = Some(vec2(other.x as f32 -self.biots[n].pos.x+0.0001, other.y as f32 -self.biots[n].pos.y+0.0001).normalize());
                         break;
                     }
