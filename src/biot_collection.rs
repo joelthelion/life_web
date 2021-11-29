@@ -1,6 +1,7 @@
 use macroquad::prelude::*;
 use crate::biot::{Biot, TreePoint};
 use rstar::RTree;
+use std::collections::HashSet;
 
 /// A collection of biots. Responsible for handling interactions between biots
 pub struct BiotCollection {
@@ -47,10 +48,12 @@ impl BiotCollection {
             }
         }
         // Compute biot interactions
+        let mut visited : HashSet<usize> = HashSet::new();
         for f in tree.iter() {
+            visited.insert(f.idx);
             for s in tree.locate_within_distance([f.x, f.y], 50.) //FIXME 30 is hardcoded
             {
-                if f.idx < s.idx { // Don't do it twice
+                if ! visited.contains(&s.idx) { // Don't do it twice
                     Biot::interact(&mut self.biots, f.idx, s.idx);
                 }
             }
