@@ -5,7 +5,15 @@ mod biot_collection;
 
 use biot_collection::BiotCollection;
 
-#[macroquad::main("Life")]
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Life".to_owned(),
+        fullscreen: true,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_conf())]
 async fn main() {
 
     rand::srand(miniquad::date::now().to_bits());
