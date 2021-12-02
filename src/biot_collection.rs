@@ -32,12 +32,15 @@ impl BiotCollection {
             let mut feed_dir : Option<Vec2> = None;
             if self.biots[n].intelligence > 0. {
                 for (other, d2) in tree.nearest_neighbor_iter_with_distance_2(&[self.biots[n].pos.x as f64, self.biots[n].pos.y as f64]) {
+                    if other.idx == n {
+                        // Filter the biot itself out of the query.
+                        continue;
+                    }
                     if d2 as f32 > (self.biots[n].intelligence*self.biots[n].intelligence)*1600. {
                         break;
                     }
                     if self.biots[n].stronger(&self.biots[other.idx]) {
-                        // Add small offset to workaround rstart panic. TODO: report it upstream
-                        feed_dir = Some(vec2(other.x as f32 -self.biots[n].pos.x+0.0001, other.y as f32 -self.biots[n].pos.y+0.0001).normalize());
+                        feed_dir = Some(vec2(other.x as f32 -self.biots[n].pos.x, other.y as f32 -self.biots[n].pos.y).normalize());
                         break;
                     }
                 }
