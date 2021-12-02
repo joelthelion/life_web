@@ -121,7 +121,7 @@ impl Biot {
     }
     /// Are we stronger than this other biot?
     pub fn stronger(&self, other: &Self) -> bool {
-        self.attack > other.attack + other.defense * 0.8
+        self.attack > other.attack + other.defense * 0.9
     }
     /// Compute chacteristics from biot genome
     fn set_from_genome(&mut self) {
