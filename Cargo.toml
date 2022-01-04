@@ -6,6 +6,12 @@ edition = "2021"
 [profile.dev.package.'*']
 opt-level = 3
 
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
 [dependencies]
 glam = "0.20.1"
 macroquad = "0.3"
