@@ -15,18 +15,20 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf())]
 async fn main() {
-
     rand::srand(miniquad::date::now().to_bits());
     let mut biots = BiotCollection::new(600);
 
     loop {
         biots.step();
-        clear_background(Color::new(0.,0.,0.1,1.0));
+        clear_background(Color::new(0., 0., 0.1, 1.0));
         biots.draw();
-        draw_text(&format!("FPS: {}, biots: {}", get_fps(), biots.len()),
-            screen_width()-200., screen_height()-5.,
+        draw_text(
+            &format!("FPS: {}, biots: {}", get_fps(), biots.len()),
+            screen_width() - 200.,
+            screen_height() - 5.,
             18.,
-            LIGHTGRAY);
+            LIGHTGRAY,
+        );
         next_frame().await
     }
 }
